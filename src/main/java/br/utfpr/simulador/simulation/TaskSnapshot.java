@@ -12,9 +12,9 @@ public class TaskSnapshot {
 
     private int id;
 
-    private int remainingTime;
-
     private TaskState state;
+
+    private int remainingTime;
 
     private int currentCPU;
 
@@ -26,9 +26,10 @@ public class TaskSnapshot {
     ) {
 
         this.id = id;
-        this.remainingTime = remainingTime;
         this.state = state;
+        this.remainingTime = remainingTime;
         this.currentCPU = currentCPU;
+
     }
 
     public int getId() {

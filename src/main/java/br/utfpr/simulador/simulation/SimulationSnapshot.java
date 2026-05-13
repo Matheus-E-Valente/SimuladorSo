@@ -14,19 +14,15 @@ public class SimulationSnapshot {
 
     private List<CPUSnapshot> cpuSnapshots;
 
-    private List<Integer> readyQueueTaskIds;
-
     public SimulationSnapshot(
             int tick,
             List<TaskSnapshot> taskSnapshots,
-            List<CPUSnapshot> cpuSnapshots,
-            List<Integer> readyQueueTaskIds
+            List<CPUSnapshot> cpuSnapshots
     ) {
 
         this.tick = tick;
         this.taskSnapshots = taskSnapshots;
         this.cpuSnapshots = cpuSnapshots;
-        this.readyQueueTaskIds = readyQueueTaskIds;
     }
 
     public int getTick() {
@@ -39,9 +35,5 @@ public class SimulationSnapshot {
 
     public List<CPUSnapshot> getCpuSnapshots() {
         return cpuSnapshots;
-    }
-
-    public List<Integer> getReadyQueueTaskIds() {
-        return readyQueueTaskIds;
     }
 }

@@ -8,7 +8,6 @@ import br.utfpr.simulador.simulation.SimulationConfig;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +22,7 @@ public class ConfigParser {
      */
     public SimulationConfig parse(
             String filePath
-    ) throws IOException {
+    ) throws Exception {
 
         BufferedReader reader =
                 new BufferedReader(
@@ -40,19 +39,20 @@ public class ConfigParser {
         String[] systemParts =
                 firstLine.split(";");
 
-        String schedulerName =
-                systemParts[0]
+        String algorithm =
+                systemData[0]
                         .trim()
                         .toUpperCase();
 
+
         int quantum =
                 Integer.parseInt(
-                        systemParts[1].trim()
+                        systemParts[1]
                 );
 
         int cpuCount =
                 Integer.parseInt(
-                        systemParts[2].trim()
+                        systemParts[2]
                 );
 
         // =========================
@@ -61,23 +61,11 @@ public class ConfigParser {
 
         Scheduler scheduler;
 
-        switch (schedulerName) {
-
-            case "SRTF":
-                scheduler =
-                        new SRTFScheduler();
-                break;
-
-            case "PRIOP":
-                scheduler =
-                        new PriorityScheduler();
-                break;
-
-            default:
-                throw new IllegalArgumentException(
-                        "Algoritmo inválido: "
-                                + schedulerName
-                );
+        if (algorithm.equals("SRTF")) {
+            scheduler = new SRTFScheduler();
+        }
+        else {
+            scheduler = new PriorityScheduler();
         }
 
         // =========================
