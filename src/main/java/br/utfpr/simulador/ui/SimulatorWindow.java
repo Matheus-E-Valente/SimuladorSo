@@ -117,23 +117,23 @@ public class SimulatorWindow extends JFrame {
         // BOTÕES
         // =====================================
 
-        JPanel buttonPanel =
-                new JPanel();
+        JPanel buttonPanel = new JPanel();
 
-        JButton nextButton =
-                new JButton("NEXT");
+        JButton nextButton = new JButton("NEXT");
 
-        JButton previousButton =
-                new JButton("PREVIOUS");
+        JButton previousButton = new JButton("PREVIOUS");
 
-        JButton runButton =
-                new JButton("RUN");
+        JButton runButton = new JButton("RUN");
+
+        JButton exportButton = new JButton("EXPORT PNG");
 
         buttonPanel.add(nextButton);
 
         buttonPanel.add(previousButton);
 
         buttonPanel.add(runButton);
+
+        buttonPanel.add(exportButton);
 
         add(buttonPanel, BorderLayout.SOUTH);
 
@@ -160,6 +160,13 @@ public class SimulatorWindow extends JFrame {
             engine.runUntilEnd();
 
             refreshScreen();
+        });
+
+        exportButton.addActionListener(e -> {
+
+            ganttPanel.exportPNG(
+                    "gantt.png"
+            );
         });
     }
 

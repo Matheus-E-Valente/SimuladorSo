@@ -36,7 +36,7 @@ public class ConfigParser {
         String firstLine =
                 reader.readLine();
 
-        String[] systemParts =
+        String[] systemData =
                 firstLine.split(";");
 
         String algorithm =
@@ -46,14 +46,9 @@ public class ConfigParser {
 
 
         int quantum =
-                Integer.parseInt(
-                        systemParts[1]
-                );
-
+                Integer.parseInt(systemData[1]);
         int cpuCount =
-                Integer.parseInt(
-                        systemParts[2]
-                );
+                Integer.parseInt(systemData[2]);
 
         // =========================
         // CRIAR SCHEDULER
@@ -77,50 +72,45 @@ public class ConfigParser {
 
         String line;
 
-        while ((line = reader.readLine())
-                != null) {
+        while ((line = reader.readLine()) != null) {
 
-            // Ignora linhas vazias
+            // ignora linhas vazias
             if (line.trim().isEmpty()) {
                 continue;
             }
 
-            String[] parts =
-                    line.split(";");
+            String[] data = line.split(";");
 
-            int id =
-                    Integer.parseInt(
-                            parts[0].trim()
-                    );
+            if (data.length < 5) {
 
-            String color =
-                    parts[1].trim();
+                System.out.println(
+                        "Linha inválida no config.txt:"
+                );
 
-            int arrival =
-                    Integer.parseInt(
-                            parts[2].trim()
-                    );
+                System.out.println(line);
 
-            int duration =
-                    Integer.parseInt(
-                            parts[3].trim()
-                    );
+                continue;
+            }
 
-            int priority =
-                    Integer.parseInt(
-                            parts[4].trim()
-                    );
+            int id = Integer.parseInt(data[0]);
 
-            TaskControlBlock task =
+            String color = data[1];
+
+            int arrival = Integer.parseInt(data[2]);
+
+            int duration = Integer.parseInt(data[3]);
+
+            int priority = Integer.parseInt(data[4]);
+
+            tasks.add(
                     new TaskControlBlock(
                             id,
                             color,
                             arrival,
                             duration,
                             priority
-                    );
-
-            tasks.add(task);
+                    )
+            );
         }
 
         reader.close();

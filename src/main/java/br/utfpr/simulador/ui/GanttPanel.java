@@ -12,6 +12,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+
 /*
  * Painel responsável por desenhar
  * o gráfico de Gantt.
@@ -328,5 +332,45 @@ public class GanttPanel extends JPanel {
         return Color.decode(
                 "#" + task.getColor()
         );
+    }
+
+    /*
+     * Exporta PNG do gantt
+     */
+    public void exportPNG(
+            String fileName
+    ) {
+
+        BufferedImage image =
+                new BufferedImage(
+                        getWidth(),
+                        getHeight(),
+                        BufferedImage.TYPE_INT_ARGB
+                );
+
+        Graphics2D g2 =
+                image.createGraphics();
+
+        paint(g2);
+
+        g2.dispose();
+
+        try {
+
+            ImageIO.write(
+                    image,
+                    "png",
+                    new File(fileName)
+            );
+
+            System.out.println(
+                    "PNG exportado: " +
+                            fileName
+            );
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
     }
 }

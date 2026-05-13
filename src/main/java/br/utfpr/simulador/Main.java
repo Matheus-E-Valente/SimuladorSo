@@ -1,6 +1,5 @@
 package br.utfpr.simulador;
 
-import br.utfpr.simulador.model.TaskState;
 import br.utfpr.simulador.parser.ConfigParser;
 import br.utfpr.simulador.simulation.SimulationConfig;
 import br.utfpr.simulador.simulation.SimulationEngine;
