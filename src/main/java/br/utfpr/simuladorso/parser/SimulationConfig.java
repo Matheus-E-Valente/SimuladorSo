@@ -1,25 +1,24 @@
-package br.utfpr.simulador.simulation;
+package br.utfpr.simuladorso.parser;
 
-import br.utfpr.simulador.model.TaskControlBlock;
-import br.utfpr.simulador.scheduler.Scheduler;
+import br.utfpr.simuladorso.model.TaskControlBlock;
+import br.utfpr.simuladorso.scheduler.Scheduler;
 
 import java.util.List;
 
 /*
- * Armazena toda configuração da simulação.
+ * Objeto de configuracao criado a partir do arquivo config.txt.
+ *
+ * Ele separa a leitura do arquivo da execucao da simulacao. Com isso, o Main
+ * apenas recebe uma configuracao pronta e monta o motor da simulacao.
  */
 public class SimulationConfig {
 
-    // Algoritmo de escalonamento
     private Scheduler scheduler;
 
-    // Quantum do sistema
     private int quantum;
 
-    // Quantidade de CPUs
     private int cpuCount;
 
-    // Lista de tarefas
     private List<TaskControlBlock> tasks;
 
     public SimulationConfig(

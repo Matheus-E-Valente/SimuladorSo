@@ -1,7 +1,10 @@
-package br.utfpr.simulador.simulation;
+package br.utfpr.simuladorso.simulation;
 
 /*
- * Snapshot de uma CPU.
+ * Fotografia do estado de uma CPU em um tick especifico.
+ *
+ * O snapshot e usado para desenhar o Gantt e tambem para restaurar a simulacao
+ * quando o usuario clica em BACK.
  */
 public class CPUSnapshot {
 

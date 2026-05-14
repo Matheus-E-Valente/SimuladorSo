@@ -1,10 +1,13 @@
-package br.utfpr.simulador.ui;
+package br.utfpr.simuladorso.ui;
 
-import br.utfpr.simulador.model.TaskControlBlock;
-import br.utfpr.simulador.model.TaskState;
-import br.utfpr.simulador.simulation.SimulationEngine;
-import br.utfpr.simulador.simulation.SimulationSnapshot;
-import br.utfpr.simulador.simulation.TaskSnapshot;
+import br.utfpr.simuladorso.event.EventType;
+import br.utfpr.simuladorso.event.SimulationEvent;
+import br.utfpr.simuladorso.model.TaskControlBlock;
+import br.utfpr.simuladorso.model.TaskState;
+import br.utfpr.simuladorso.simulation.CPUSnapshot;
+import br.utfpr.simuladorso.simulation.SimulationEngine;
+import br.utfpr.simuladorso.simulation.SimulationSnapshot;
+import br.utfpr.simuladorso.simulation.TaskSnapshot;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,6 +25,13 @@ import java.io.File;
  *
  * Eixo Y -> tarefas
  * Eixo X -> tempo (ticks)
+ */
+/*
+ * Painel responsavel por desenhar o grafico de Gantt.
+ *
+ * As linhas superiores representam tarefas ao longo dos ticks. As linhas
+ * inferiores representam as CPUs, permitindo visualizar quando cada CPU esta
+ * executando uma tarefa ou desligada.
  */
 public class GanttPanel extends JPanel {
 
@@ -66,6 +76,9 @@ public class GanttPanel extends JPanel {
 
     /*
      * Desenha gráfico completo.
+     */
+    /*
+     * Desenha o grafico completo a partir do historico salvo no motor.
      */
     private void drawGantt(
             Graphics2D g2
@@ -155,14 +168,25 @@ public class GanttPanel extends JPanel {
             }
         }
 
+        int cpuStartY =
+                TOP_MARGIN +
+                        tasks.size() * CELL_HEIGHT +
+                        35;
+
+        drawCpuStatusRows(
+                g2,
+                history,
+                cpuStartY
+        );
+
         // =====================================
         // DESENHAR EIXO X (TICKS)
         // =====================================
 
         int axisY =
-                TOP_MARGIN +
-                        tasks.size() * CELL_HEIGHT +
-                        20;
+                cpuStartY +
+                        engine.getCpus().size() * CELL_HEIGHT +
+                        25;
 
         for (int tick = 0;
              tick < history.size();
@@ -180,10 +204,21 @@ public class GanttPanel extends JPanel {
                     axisY
             );
         }
+
+        drawLegend(
+                g2,
+                axisY + 30
+        );
     }
 
     /*
      * Desenha uma célula da task.
+     */
+    /*
+     * Desenha uma celula de tarefa para um tick.
+     *
+     * Cores seguem o enunciado: executando usa a cor da tarefa, pronto fica
+     * branco, bloqueado fica preto e finalizado fica cinza.
      */
     private void drawTaskCell(
             Graphics2D g2,
@@ -300,6 +335,235 @@ public class GanttPanel extends JPanel {
                 CELL_WIDTH,
                 CELL_HEIGHT
         );
+
+        drawTaskEvents(
+                g2,
+                taskSnapshot,
+                x,
+                y
+        );
+    }
+
+    /*
+     * Desenha os icones dos eventos ocorridos no tick da celula.
+     */
+    private void drawTaskEvents(
+            Graphics2D g2,
+            TaskSnapshot taskSnapshot,
+            int x,
+            int y
+    ) {
+
+        SimulationSnapshot snapshot =
+                engine.getHistory().get(
+                        Math.max(
+                                0,
+                                (x - LEFT_MARGIN) / CELL_WIDTH
+                        )
+                );
+
+        int offset = 0;
+
+        for (SimulationEvent event :
+                snapshot.getEvents()) {
+
+            if (event.getTick() != snapshot.getTick() - 1
+                    || event.getTaskId() != taskSnapshot.getId()) {
+                continue;
+            }
+
+            drawEventIcon(
+                    g2,
+                    event.getType(),
+                    x + 4 + offset,
+                    y + 4
+            );
+
+            offset += 11;
+        }
+    }
+
+    /*
+     * Cada tipo de evento recebe um elemento grafico diferente para facilitar a
+     * leitura do Gantt e cumprir o requisito da legenda.
+     */
+    private void drawEventIcon(
+            Graphics2D g2,
+            EventType type,
+            int x,
+            int y
+    ) {
+
+        if (type == EventType.TASK_ARRIVAL) {
+            g2.setColor(new Color(0, 150, 70));
+            int[] xs = {x, x + 9, x + 4};
+            int[] ys = {y + 9, y + 9, y};
+            g2.fillPolygon(xs, ys, 3);
+        }
+        else if (type == EventType.TASK_FINISHED) {
+            g2.setColor(Color.RED);
+            g2.drawLine(x, y, x + 9, y + 9);
+            g2.drawLine(x + 9, y, x, y + 9);
+        }
+        else if (type == EventType.TASK_PREEMPTED) {
+            g2.setColor(new Color(230, 140, 0));
+            g2.fillRect(x + 3, y, 4, 10);
+        }
+        else if (type == EventType.RANDOM_TIE_BREAK) {
+            g2.setColor(new Color(150, 60, 180));
+            g2.fillOval(x, y, 10, 10);
+            g2.setColor(Color.WHITE);
+            g2.drawString("?", x + 2, y + 9);
+        }
+    }
+
+    /*
+     * Desenha linhas adicionais para cada CPU.
+     *
+     * Essas linhas deixam explicito se a CPU estava executando alguma tarefa ou
+     * se foi desligada por falta de trabalho pronto.
+     */
+    private void drawCpuStatusRows(
+            Graphics2D g2,
+            List<SimulationSnapshot> history,
+            int startY
+    ) {
+
+        for (int cpuIndex = 0;
+             cpuIndex < engine.getCpus().size();
+             cpuIndex++) {
+
+            int y =
+                    startY +
+                            cpuIndex * CELL_HEIGHT;
+
+            g2.setColor(Color.BLACK);
+            g2.drawString(
+                    "CPU " + cpuIndex,
+                    35,
+                    y + 25
+            );
+
+            for (int tick = 0;
+                 tick < history.size();
+                 tick++) {
+
+                SimulationSnapshot snapshot =
+                        history.get(tick);
+
+                CPUSnapshot cpuSnapshot =
+                        getCpuSnapshot(
+                                snapshot,
+                                cpuIndex
+                        );
+
+                int x =
+                        LEFT_MARGIN +
+                                tick * CELL_WIDTH;
+
+                if (cpuSnapshot == null
+                        || !cpuSnapshot.isPoweredOn()) {
+
+                    g2.setColor(Color.DARK_GRAY);
+                    g2.fillRect(
+                            x,
+                            y,
+                            CELL_WIDTH,
+                            CELL_HEIGHT
+                    );
+
+                    g2.setColor(Color.WHITE);
+                    g2.drawString(
+                            "OFF",
+                            x + 7,
+                            y + 25
+                    );
+                }
+                else {
+
+                    g2.setColor(new Color(220, 245, 230));
+                    g2.fillRect(
+                            x,
+                            y,
+                            CELL_WIDTH,
+                            CELL_HEIGHT
+                    );
+
+                    if (cpuSnapshot.getRunningTaskId() != null) {
+                        g2.setColor(Color.BLACK);
+                        g2.drawString(
+                                "T" + cpuSnapshot.getRunningTaskId(),
+                                x + 9,
+                                y + 25
+                        );
+                    }
+                }
+
+                g2.setColor(Color.BLACK);
+                g2.drawRect(
+                        x,
+                        y,
+                        CELL_WIDTH,
+                        CELL_HEIGHT
+                );
+            }
+        }
+    }
+
+    private CPUSnapshot getCpuSnapshot(
+            SimulationSnapshot snapshot,
+            int cpuId
+    ) {
+
+        for (CPUSnapshot cpuSnapshot :
+                snapshot.getCpuSnapshots()) {
+
+            if (cpuSnapshot.getCpuId() == cpuId) {
+                return cpuSnapshot;
+            }
+        }
+
+        return null;
+    }
+
+    /*
+     * Desenha a legenda dos icones e da representacao de CPU desligada.
+     */
+    private void drawLegend(
+            Graphics2D g2,
+            int y
+    ) {
+
+        int x = LEFT_MARGIN;
+
+        g2.setColor(Color.BLACK);
+        g2.drawString(
+                "Legenda:",
+                x,
+                y
+        );
+
+        drawEventIcon(g2, EventType.TASK_ARRIVAL, x + 70, y - 10);
+        g2.setColor(Color.BLACK);
+        g2.drawString("chegada", x + 85, y);
+
+        drawEventIcon(g2, EventType.TASK_FINISHED, x + 155, y - 10);
+        g2.setColor(Color.BLACK);
+        g2.drawString("fim", x + 170, y);
+
+        drawEventIcon(g2, EventType.TASK_PREEMPTED, x + 215, y - 10);
+        g2.setColor(Color.BLACK);
+        g2.drawString("preempcao", x + 230, y);
+
+        drawEventIcon(g2, EventType.RANDOM_TIE_BREAK, x + 330, y - 10);
+        g2.setColor(Color.BLACK);
+        g2.drawString("sorteio", x + 345, y);
+
+        g2.setColor(Color.DARK_GRAY);
+        g2.fillRect(x + 420, y - 12, 16, 12);
+        g2.setColor(Color.BLACK);
+        g2.drawRect(x + 420, y - 12, 16, 12);
+        g2.drawString("CPU desligada", x + 445, y);
     }
 
     /*
@@ -323,15 +587,13 @@ public class GanttPanel extends JPanel {
     }
 
     /*
-     * Converte HEX da task para Color.
+     * Retorna a cor configurada da task.
      */
     private Color getTaskColor(
             TaskControlBlock task
     ) {
 
-        return Color.decode(
-                "#" + task.getColor()
-        );
+        return task.getColor();
     }
 
     /*

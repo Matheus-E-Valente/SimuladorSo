@@ -1,8 +1,10 @@
-package br.utfpr.simulador.event;
+package br.utfpr.simuladorso.event;
 
 /*
- * Representa um evento importante
- * ocorrido na simulação.
+ * Evento importante ocorrido durante a simulacao.
+ *
+ * Cada evento guarda o tick em que ocorreu, a tarefa relacionada e o tipo do
+ * evento. A interface usa esses dados para desenhar icones distintos no Gantt.
  */
 public class SimulationEvent {
 

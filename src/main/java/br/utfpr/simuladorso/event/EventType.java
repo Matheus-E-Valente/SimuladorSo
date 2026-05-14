@@ -1,7 +1,7 @@
-package br.utfpr.simulador.event;
+package br.utfpr.simuladorso.event;
 
 /*
- * Tipos de eventos da simulação.
+ * Tipos de eventos relevantes que podem aparecer no grafico de Gantt.
  */
 public enum EventType {
 

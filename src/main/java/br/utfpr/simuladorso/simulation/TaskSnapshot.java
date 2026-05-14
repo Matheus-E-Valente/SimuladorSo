@@ -1,12 +1,12 @@
-package br.utfpr.simulador.simulation;
+package br.utfpr.simuladorso.simulation;
 
-import br.utfpr.simulador.model.TaskState;
+import br.utfpr.simuladorso.model.TaskState;
 
 /*
- * Snapshot de uma tarefa.
+ * Fotografia de uma tarefa em um tick especifico.
  *
- * Guarda o estado da tarefa
- * em um tick específico.
+ * Guarda apenas os dados que podem mudar durante a simulacao e que precisam
+ * ser recuperados no retrocesso: estado, tempo restante e CPU atual.
  */
 public class TaskSnapshot {
 
@@ -20,8 +20,8 @@ public class TaskSnapshot {
 
     public TaskSnapshot(
             int id,
-            int remainingTime,
             TaskState state,
+            int remainingTime,
             int currentCPU
     ) {
 
@@ -29,19 +29,18 @@ public class TaskSnapshot {
         this.state = state;
         this.remainingTime = remainingTime;
         this.currentCPU = currentCPU;
-
     }
 
     public int getId() {
         return id;
     }
 
-    public int getRemainingTime() {
-        return remainingTime;
-    }
-
     public TaskState getState() {
         return state;
+    }
+
+    public int getRemainingTime() {
+        return remainingTime;
     }
 
     public int getCurrentCPU() {
