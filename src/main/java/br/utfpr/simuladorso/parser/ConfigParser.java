@@ -103,8 +103,11 @@ public class ConfigParser {
                 continue;
             }
 
+
+            String texto = data[0].trim();
+            String apenasNumeros = texto.replaceAll("\\D", "");
             int id = Integer.parseInt(
-                    data[0].trim()
+                    apenasNumeros
             );
 
             Color color =
